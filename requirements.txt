@@ -1,0 +1,7 @@
+python-telegram-bot[ext]>=21.0
+anthropic>=0.28.0
+python-dotenv>=1.0.0
+
+# Optional — only needed if using Google Calendar reminders
+# google-auth>=2.29.0
+# google-api-python-client>=2.127.0
