@@ -5,6 +5,7 @@ Run with: python -m app.main
 """
 
 import os
+import asyncio
 import logging
 from dotenv import load_dotenv
 from telegram import Update
@@ -16,6 +17,7 @@ from telegram.ext import (
     filters,
 )
 from .bot import handle_message
+from .reminders import set_telegram_app, reminder_scheduler
 
 load_dotenv()
 
@@ -71,9 +73,21 @@ async def ignore(update: Update, context: ContextTypes.DEFAULT_TYPE):
     pass
 
 
+# ── Start scheduler when bot is ready ────────────────────────────────────────
+async def on_startup(app):
+    set_telegram_app(app)
+    asyncio.create_task(reminder_scheduler())
+    log.info("Reminder scheduler started!")
+
+
 # ── App bootstrap ─────────────────────────────────────────────────────────────
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = (
+        ApplicationBuilder()
+        .token(TOKEN)
+        .post_init(on_startup)
+        .build()
+    )
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("bot",   cmd_bot))
     app.add_handler(MessageHandler(filters.ALL, ignore))
